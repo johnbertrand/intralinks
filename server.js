@@ -12,6 +12,8 @@ var client_id = "B41PayHaro1unIcFzWXSoVU8r9KBD6z6";
 var secret =  "tkkkqxQvk1Z7OUwy";
 //used to get oauth token
 var code;
+//oauth token
+var token;
 
 function handleRequest(request, response){
   try{
@@ -36,6 +38,14 @@ function homePage(req,res){
   res.write('<html>\n<body>');
   res.write('<h1>Intralinks Coding Exercise</h1>');
   res.write('<a href=\"https://test-api.intralinks.com/v2/oauth/authorize?client_id=' + client_id + '&endOtherSessions=false\">Login</a>');
+  res.write('<br>');
+  res.write('<a href=\"localhost:3000/workspaces\">Workspaces</a>');
+  res.write('<br>');
+  if( token != undefined ){
+	  res.write('<p>You are logged in!</p>');
+  } else {
+	  res.write('<p>You are not logged in!</p>');
+  }
   res.write('</body></html>');
   res.end();
 }
@@ -67,11 +77,30 @@ dispatcher.onGet("/callback", function(req,res) {
       method: 'POST'
     }, function (err, response, body) {
       if( err ){
-        console.log(error);
+        console.log(err);
       }
-      token_object = JSON.parse(body);
-      token = token_object.access_token;
-      console.log(token);
-	  homePage(req,res);
+	  else if(response.statusCode > 400 ){
+		errorPage(res,response);
+	  } else {
+        token_object = JSON.parse(body);
+        token = token_object.access_token;
+	    homePage(req,res);
+	  }
     });
 });
+
+//display an error page with link to "/"
+function errorPage(res, response){
+  body = JSON.parse(response.body)
+  res.writeHead(400, {'Content-Type': 'text/html'});
+  res.write('<html>\n<body>');
+  res.write('<a href=\"http://localhost:3000/\">Home</a>');
+  res.write('<p>');
+  res.write(body['error']['code'] + ' : ' + body['status']);
+  res.write('</p>');
+  res.write('<p>');
+  res.write(body['error']['description']);
+  res.write('</p>');
+  res.write('</body></html>');
+  res.end();
+}

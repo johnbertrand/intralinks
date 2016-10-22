@@ -146,7 +146,6 @@ function getFolder(req,res){
         console.log(error);
     } else {
       contentsObject = JSON.parse(body);
-      console.log(body);
       folderPage(req,res,contentsObject);
     }
   }
@@ -204,7 +203,18 @@ function folderPage(req,res,obj){
     res.write('</body></html>');
     res.end();
   } else {
-    //
+    console.log(obj);
+	if( obj['contentList']['docFolderList'] != undefined){
+      for (var i=0; i<obj['contentList']['docFolderList'].length; i++){
+        var name = obj['contentList']['docFolderList'][i]['name'];
+        var id = obj['contentList']['docFolderList'][i]['id'];
+        
+		res.write('<p>' + name + '</p>');
+		
+      }
+    }
+	
+	
     res.write('</body></html>');
     res.end();  
   }

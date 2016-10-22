@@ -110,6 +110,39 @@ function workspacesPage(req,res){
   }
 }
 
+//request content of current workspace
+function getContents(req,res){
+	var options = {
+	  url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.id + '/folders/',
+	  headers: {
+		'Authorization' : 'Bearer ' + token,
+		'Accept' : 'application/json'
+	  }
+	};
+
+	function callback(error, response, body) {
+	  console.log(body);
+	  contentPage(req,res);
+	}
+
+	request(options, callback);
+}
+
+//display contents of a workspace
+function contentPage(req,res){
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.write('<html>\n<body>');
+  res.write('<h1>Intralinks Coding Exercise</h1>');
+  res.write('<a href=\"https://test-api.intralinks.com/v2/oauth/authorize?client_id=' + client_id + '&endOtherSessions=false\">Login</a>');
+  res.write('<br>');
+  res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
+  res.write('<br>');
+  res.write('<h3>' + req.params.name + '</h3>');
+  
+  res.write('</body></html>');
+  res.end();  
+}
+
 //at root, return home page
 dispatcher.onGet("/", function(req,res) {
   homePage(req,res);
@@ -118,6 +151,11 @@ dispatcher.onGet("/", function(req,res) {
 //page to display all workspaces
 dispatcher.onGet("/workspaces", function(req,res) {
   getWorkspaces(req,res);
+});
+
+//page to display a specific workspace
+dispatcher.onGet("/workspace", function(req,res) {
+  getContents(req,res);
 });
 
 //callback, return here after login page

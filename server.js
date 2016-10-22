@@ -146,7 +146,7 @@ function getFolder(req,res){
         console.log(error);
     } else {
       contentsObject = JSON.parse(body);
-      folderPage(req,res,contentsObject);
+      folderPage(req,res,contentsObject,req.params.workspace);
     }
   }
   request(options, callback);
@@ -186,7 +186,7 @@ function contentPage(req,res,obj,workspace){
 }
 
 //display contents of a folder
-function folderPage(req,res,obj){
+function folderPage(req,res,obj,workspace){
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write('<html>\n<body>');
   res.write('<h1>Intralinks Coding Exercise</h1>');
@@ -196,21 +196,26 @@ function folderPage(req,res,obj){
   res.write('<br>');
   if( req.params.name != undefined ){
     res.write('<h3>/' + req.params.name + '</h3>');
-	res.write('<a href=\"\">[Back]</a>'); //TODO
+	res.write('<a href=\"\">[BACK]</a>'); //TODO
+	res.write('<br><br>');
   }
   if( token == undefined ){
     res.write('<p>You are not logged in!</p>');  
     res.write('</body></html>');
     res.end();
   } else {
-    console.log(obj);
-	if( obj['contentList']['docFolderList'] != undefined){
+	if( obj['contentList'] != undefined && obj['contentList']['docFolderList'] != undefined){
       for (var i=0; i<obj['contentList']['docFolderList'].length; i++){
         var name = obj['contentList']['docFolderList'][i]['name'];
         var id = obj['contentList']['docFolderList'][i]['id'];
         
-		res.write('<p>' + name + '</p>');
-		
+		if( obj['contentList']['docFolderList'][i]['entityType'] == "DOCUMENT" ){ //document
+		  res.write('<p>' + name + '</p>');
+		} else { //folder
+		  res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
+                      + workspace + '&name=' + name + '\">/' + name + '</a><br>');
+		}
+		res.write('<br>');
       }
     }
 	

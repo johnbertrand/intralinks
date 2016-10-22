@@ -100,12 +100,12 @@ function workspacesPage(req,res){
   res.write('<br>');
   res.write('<h3>Workspaces</h3>');
   if( token == undefined ){
-  res.write('<p>You are not logged in!</p>');  
-  res.write('</body></html>');
+    res.write('<p>You are not logged in!</p>');  
+    res.write('</body></html>');
     res.end();
   } else {
-  listWorkspaces(req,res);
-  res.write('</body></html>');
+    listWorkspaces(req,res);
+    res.write('</body></html>');
     res.end();  
   }
 }
@@ -125,8 +125,29 @@ function getContents(req,res){
         console.log(error);
     } else {
       contentsObject = JSON.parse(body);
-      console.log(body);
       contentPage(req,res,contentsObject,req.params.id);
+    }
+  }
+  request(options, callback);
+}
+
+//request content of specific folder
+function getFolder(req,res){
+	var options = {
+    url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/folders/' + req.params.id + '/contents',
+    headers: {
+    'Authorization' : 'Bearer ' + token,
+    'Accept' : 'application/json'
+    }
+  };
+  
+  function callback(error, response, body) {
+    if( error ){
+        console.log(error);
+    } else {
+      contentsObject = JSON.parse(body);
+      console.log(body);
+      folderPage(req,res,contentsObject);
     }
   }
   request(options, callback);
@@ -156,10 +177,34 @@ function contentPage(req,res,obj,workspace){
 		var parentId = obj['folder'][i]['parentId'];
 	    if( parentId == undefined ){
 		  res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
-                      + workspace + '\">/' + name + '</a><br>');
+                      + workspace + '&name=' + name + '\">/' + name + '</a><br>');
 	    }
       }
     }
+    res.write('</body></html>');
+    res.end();  
+  }
+}
+
+//display contents of a folder
+function folderPage(req,res,obj){
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.write('<html>\n<body>');
+  res.write('<h1>Intralinks Coding Exercise</h1>');
+  res.write('<a href=\"https://test-api.intralinks.com/v2/oauth/authorize?client_id=' + client_id + '&endOtherSessions=false\">Login</a>');
+  res.write('<br>');
+  res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
+  res.write('<br>');
+  if( req.params.name != undefined ){
+    res.write('<h3>/' + req.params.name + '</h3>');
+	res.write('<a href=\"\">[Back]</a>'); //TODO
+  }
+  if( token == undefined ){
+    res.write('<p>You are not logged in!</p>');  
+    res.write('</body></html>');
+    res.end();
+  } else {
+    //
     res.write('</body></html>');
     res.end();  
   }
@@ -178,6 +223,11 @@ dispatcher.onGet("/workspaces", function(req,res) {
 //page to display a specific workspace
 dispatcher.onGet("/workspace", function(req,res) {
   getContents(req,res);
+});
+
+//page to display a specific folder
+dispatcher.onGet("/folder", function(req,res) {
+  getFolder(req,res);
 });
 
 //callback, return here after login page

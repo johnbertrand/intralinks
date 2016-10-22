@@ -220,7 +220,8 @@ function folderPage(req,res,obj,workspace){
     }
 	
 	//upload prompt
-	res.write('<br><a href=\"\">[Upload File Here]</a>');
+	var docName = "theNewDocument";
+	res.write('<br><a href=\"http://localhost:3000/upload?workspace=' + workspace + '&folderId=' + req.params.id + '&docName=' + docName + '\">[Upload File Here]</a>');
 	
     res.write('</body></html>');
     res.end();  
@@ -247,6 +248,71 @@ dispatcher.onGet("/folder", function(req,res) {
   getFolder(req,res);
 });
 
+//creates placeholder document
+function createPlaceHolderDocument(req, res){
+
+  var post_json = { documents:[{document: {name: req.params.docName, parentId : parseInt(req.params.folderId)}}]};
+  
+  var post_data = JSON.stringify(post_json);
+  console.log(post_data);
+  
+  var options = {
+	url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents',
+	headers: {
+	'Authorization' : 'Bearer ' + token,
+	'Accept' : 'application/json',
+	'Content-Type' : 'application/json',
+	},
+	method: 'POST',
+	body: post_data
+  };
+
+  function callback(error, response, body) {
+	if( response.statusCode == 201 ){
+	  //placeholder has been created, now need to upload
+	  placeholder = JSON.parse(body);
+	  
+	  id = placeholder['documentPartial'][0]['id'];
+	  version = placeholder['documentPartial'][0]['version'];
+	  
+	} else {
+		console.log('Could not create placeholder document');
+	}
+  }
+
+  
+  request(options, callback);
+	
+}
+
+//called when user wants to upload a file to a workspace
+dispatcher.onGet("/upload", function(req,res) {
+
+  var post_data = querystring.stringify({
+    'acceptSplash' : true,
+  });
+  
+  var options = {
+    url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/splash',
+    headers: {
+    'Authorization' : 'Bearer ' + token,
+    'Accept' : 'application/json',
+	'Content-Type' : 'application/json',
+    },
+	body: post_data
+  };
+
+  function callback(error, response, body) {
+    if( response.statusCode == 200 ){
+		createPlaceHolderDocument(req,res);
+	} else {
+		console.log('Could not enter workspace: ' + req.params.workspace);
+	}
+  }
+
+  request(options, callback);
+});
+
 //callback, return here after login page
 dispatcher.onGet("/callback", function(req,res) {
   code = req.params.code
@@ -258,7 +324,7 @@ dispatcher.onGet("/callback", function(req,res) {
     'client_secret' : secret,
     'endOtherSessions' : 'false'
   });
-    
+  console.log(post_data);
   request({
     headers: {
       'Content-Type' : 'application/x-www-form-urlencoded',

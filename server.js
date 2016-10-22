@@ -39,7 +39,7 @@ function homePage(req,res){
   res.write('<h1>Intralinks Coding Exercise</h1>');
   res.write('<a href=\"https://test-api.intralinks.com/v2/oauth/authorize?client_id=' + client_id + '&endOtherSessions=false\">Login</a>');
   res.write('<br>');
-  res.write('<a href=\"localhost:3000/workspaces\">Workspaces</a>');
+  res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
   res.write('<br>');
   if( token != undefined ){
 	  res.write('<p>You are logged in!</p>');
@@ -50,9 +50,35 @@ function homePage(req,res){
   res.end();
 }
 
+//display workspaces page
+function workspacesPage(req,res){
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.write('<html>\n<body>');
+  res.write('<h1>Intralinks Coding Exercise</h1>');
+  res.write('<a href=\"https://test-api.intralinks.com/v2/oauth/authorize?client_id=' + client_id + '&endOtherSessions=false\">Login</a>');
+  res.write('<br>');
+  res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
+  res.write('<br>');
+  if( token == undefined ){
+	res.write('<p>You are not logged in!</p>');  
+	res.write('</body></html>');
+    res.end();
+  } else {
+	res.write('<h3>Workspaces</h3>');
+	
+	res.write('</body></html>');
+    res.end();  
+  }
+}
+
 //at root, return home page
 dispatcher.onGet("/", function(req,res) {
   homePage(req,res);
+});
+
+//page to display all workspaces
+dispatcher.onGet("/workspaces", function(req,res) {
+  workspacesPage(req,res);
 });
 
 //callback, return here after login page

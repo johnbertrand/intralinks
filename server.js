@@ -2,6 +2,7 @@ var http = require('http');
 var dispatcher = require('httpdispatcher');
 var querystring = require('querystring'); //used to build POST request data
 var request = require('request'); //used to perform HTTP requests
+var HashMap = require('hashmap'); //HashMap datastructure
 
 //localhost:3000
 const PORT = 3000;
@@ -14,6 +15,8 @@ var secret =  "tkkkqxQvk1Z7OUwy";
 var code;
 //oauth token
 var token;
+//hashmap for workspaces (id,name)
+var workspaceMap;
 
 function handleRequest(request, response){
   try{
@@ -50,6 +53,42 @@ function homePage(req,res){
   res.end();
 }
 
+//requests current available workspaces, and adds them to hashmap
+function getWorkspaces(req,res){
+	var options = {
+	  url: 'https://test-api.intralinks.com/v2/workspaces',
+	  headers: {
+		'Authorization' : 'Bearer ' + token,
+		'Accept' : 'application/json'
+	  }
+	};
+
+	function callback(error, response, body) {
+	  workspacesObject = JSON.parse(body);
+	  workspaceMap = new HashMap();
+	  if( workspacesObject['workspace'] != undefined ){
+	    for (var i=0; i<workspacesObject['workspace'].length; i++){
+		  var name = workspacesObject['workspace'][i]['workspaceName'];
+		  var id = workspacesObject['workspace'][i]['id'];
+		  workspaceMap.set(id,name);
+  	    }
+	  }
+	  //show workspace page
+	  workspacesPage(req,res);
+	}
+
+	request(options, callback);
+}
+
+//list out workspaces
+function listWorkspaces(req,res){
+	if( workspaceMap != undefined ){
+	  workspaceMap.forEach(function(name, id) {
+		res.write('<p>' + name + ' : ' + id + '</p>');
+	  });
+	}
+}
+
 //display workspaces page
 function workspacesPage(req,res){
   res.writeHead(200, {'Content-Type': 'text/html'});
@@ -59,13 +98,13 @@ function workspacesPage(req,res){
   res.write('<br>');
   res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
   res.write('<br>');
+  res.write('<h3>Workspaces</h3>');
   if( token == undefined ){
 	res.write('<p>You are not logged in!</p>');  
 	res.write('</body></html>');
     res.end();
   } else {
-	res.write('<h3>Workspaces</h3>');
-	
+	listWorkspaces(req,res);
 	res.write('</body></html>');
     res.end();  
   }
@@ -78,7 +117,7 @@ dispatcher.onGet("/", function(req,res) {
 
 //page to display all workspaces
 dispatcher.onGet("/workspaces", function(req,res) {
-  workspacesPage(req,res);
+  getWorkspaces(req,res);
 });
 
 //callback, return here after login page

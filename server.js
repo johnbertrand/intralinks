@@ -1,5 +1,7 @@
 var http = require('http');
 var dispatcher = require('httpdispatcher');
+var querystring = require('querystring'); //used to build POST request data
+var request = require('request'); //used to perform HTTP requests
 
 //localhost:3000
 const PORT = 3000;
@@ -8,7 +10,8 @@ const PORT = 3000;
 var client_id = "B41PayHaro1unIcFzWXSoVU8r9KBD6z6";
 //Intralinks secret api key
 var secret =  "tkkkqxQvk1Z7OUwy";
-
+//used to get oauth token
+var code;
 
 function handleRequest(request, response){
   try{
@@ -40,4 +43,35 @@ function homePage(req,res){
 //at root, return home page
 dispatcher.onGet("/", function(req,res) {
   homePage(req,res);
+});
+
+//callback, return here after login page
+dispatcher.onGet("/callback", function(req,res) {
+  code = req.params.code
+  
+  var post_data = querystring.stringify({
+    'code' : code,
+    'grant_type' : 'authorization_code',
+    'client_id' : client_id,
+    'client_secret' : secret,
+    'endOtherSessions' : 'false'
+  });
+    
+  request({
+    headers: {
+      'Content-Type' : 'application/x-www-form-urlencoded',
+      'Accept' : 'application/json'
+    },
+      uri: 'https://test-api.intralinks.com/v2/oauth/token',
+      body: post_data,
+      method: 'POST'
+    }, function (err, response, body) {
+      if( err ){
+        console.log(error);
+      }
+      token_object = JSON.parse(body);
+      token = token_object.access_token;
+      console.log(token);
+	  homePage(req,res);
+    });
 });

@@ -195,8 +195,8 @@ function folderPage(req,res,obj,workspace){
   res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
   res.write('<br>');
   if( req.params.name != undefined ){
-    res.write('<h3>/' + req.params.name + '</h3>');
-	res.write('<a href=\"\">[BACK]</a>'); //TODO
+    res.write('<br><br><a href=\"\">[BACK]</a>'); //TODO
+	res.write('<h3>/' + req.params.name + '</h3>');
 	res.write('<br><br>');
   }
   if( token == undefined ){
@@ -219,6 +219,8 @@ function folderPage(req,res,obj,workspace){
       }
     }
 	
+	//upload prompt
+	res.write('<br><a href=\"\">[Upload File Here]</a>');
 	
     res.write('</body></html>');
     res.end();  

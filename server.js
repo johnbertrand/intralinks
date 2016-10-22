@@ -126,14 +126,14 @@ function getContents(req,res){
     } else {
       contentsObject = JSON.parse(body);
       console.log(body);
-      contentPage(req,res,contentsObject);
+      contentPage(req,res,contentsObject,req.params.id);
     }
   }
   request(options, callback);
 }
 
 //display contents of a workspace
-function contentPage(req,res,obj){
+function contentPage(req,res,obj,workspace){
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write('<html>\n<body>');
   res.write('<h1>Intralinks Coding Exercise</h1>');
@@ -155,7 +155,8 @@ function contentPage(req,res,obj){
 		//do not show sub-folders
 		var parentId = obj['folder'][i]['parentId'];
 	    if( parentId == undefined ){
-	      res.write('<p>' + name + ' : ' + id + '</p>');
+		  res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
+                      + workspace + '\">/' + name + '</a><br>');
 	    }
       }
     }

@@ -126,14 +126,14 @@ function getContents(req,res){
     } else {
       contentsObject = JSON.parse(body);
       console.log(body);
-      contentPage(req,res);
+      contentPage(req,res,contentsObject);
     }
   }
   request(options, callback);
 }
 
 //display contents of a workspace
-function contentPage(req,res){
+function contentPage(req,res,obj){
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write('<html>\n<body>');
   res.write('<h1>Intralinks Coding Exercise</h1>');
@@ -147,6 +147,15 @@ function contentPage(req,res){
     res.write('</body></html>');
     res.end();
   } else {
+	
+	if( obj['folder'] != undefined){
+      for (var i=0; i<obj['folder'].length; i++){
+        var name = obj['folder'][i]['name'];
+        var id = obj['folder'][i]['id'];
+        res.write('<p>' + name + ' : ' + id + '</p>');
+      }
+    }
+	
     res.write('</body></html>');
     res.end();  
   }

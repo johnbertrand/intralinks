@@ -84,7 +84,7 @@ function getWorkspaces(req,res){
 function listWorkspaces(req,res){
 	if( workspaceMap != undefined ){
 	  workspaceMap.forEach(function(name, id) {
-		res.write('<p>' + name + ' : ' + id + '</p>');
+		res.write('<a href=\"http://localhost:3000/workspace?name=' + name + '&id=' + id + '\">/' + name + '</a><br>');
 	  });
 	}
 }

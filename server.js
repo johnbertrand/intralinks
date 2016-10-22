@@ -45,9 +45,9 @@ function homePage(req,res){
   res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
   res.write('<br>');
   if( token != undefined ){
-	  res.write('<p>You are logged in!</p>');
+    res.write('<p>You are logged in!</p>');
   } else {
-	  res.write('<p>You are not logged in!</p>');
+    res.write('<p>You are not logged in!</p>');
   }
   res.write('</body></html>');
   res.end();
@@ -55,38 +55,38 @@ function homePage(req,res){
 
 //requests current available workspaces, and adds them to hashmap
 function getWorkspaces(req,res){
-	var options = {
-	  url: 'https://test-api.intralinks.com/v2/workspaces',
-	  headers: {
-		'Authorization' : 'Bearer ' + token,
-		'Accept' : 'application/json'
-	  }
-	};
+  var options = {
+    url: 'https://test-api.intralinks.com/v2/workspaces',
+    headers: {
+    'Authorization' : 'Bearer ' + token,
+    'Accept' : 'application/json'
+    }
+  };
 
-	function callback(error, response, body) {
-	  workspacesObject = JSON.parse(body);
-	  workspaceMap = new HashMap();
-	  if( workspacesObject['workspace'] != undefined ){
-	    for (var i=0; i<workspacesObject['workspace'].length; i++){
-		  var name = workspacesObject['workspace'][i]['workspaceName'];
-		  var id = workspacesObject['workspace'][i]['id'];
-		  workspaceMap.set(id,name);
-  	    }
-	  }
-	  //show workspace page
-	  workspacesPage(req,res);
-	}
+  function callback(error, response, body) {
+    workspacesObject = JSON.parse(body);
+    workspaceMap = new HashMap();
+    if( workspacesObject['workspace'] != undefined ){
+      for (var i=0; i<workspacesObject['workspace'].length; i++){
+      var name = workspacesObject['workspace'][i]['workspaceName'];
+      var id = workspacesObject['workspace'][i]['id'];
+      workspaceMap.set(id,name);
+        }
+    }
+    //show workspace page
+    workspacesPage(req,res);
+  }
 
-	request(options, callback);
+  request(options, callback);
 }
 
 //list out workspaces
 function listWorkspaces(req,res){
-	if( workspaceMap != undefined ){
-	  workspaceMap.forEach(function(name, id) {
-		res.write('<a href=\"http://localhost:3000/workspace?name=' + name + '&id=' + id + '\">/' + name + '</a><br>');
-	  });
-	}
+  if( workspaceMap != undefined ){
+    workspaceMap.forEach(function(name, id) {
+    res.write('<a href=\"http://localhost:3000/workspace?name=' + name + '&id=' + id + '\">/' + name + '</a><br>');
+    });
+  }
 }
 
 //display workspaces page
@@ -100,32 +100,36 @@ function workspacesPage(req,res){
   res.write('<br>');
   res.write('<h3>Workspaces</h3>');
   if( token == undefined ){
-	res.write('<p>You are not logged in!</p>');  
-	res.write('</body></html>');
+  res.write('<p>You are not logged in!</p>');  
+  res.write('</body></html>');
     res.end();
   } else {
-	listWorkspaces(req,res);
-	res.write('</body></html>');
+  listWorkspaces(req,res);
+  res.write('</body></html>');
     res.end();  
   }
 }
 
 //request content of current workspace
 function getContents(req,res){
-	var options = {
-	  url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.id + '/folders/',
-	  headers: {
-		'Authorization' : 'Bearer ' + token,
-		'Accept' : 'application/json'
-	  }
-	};
+  var options = {
+    url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.id + '/folders/',
+    headers: {
+    'Authorization' : 'Bearer ' + token,
+    'Accept' : 'application/json'
+    }
+  };
 
-	function callback(error, response, body) {
-	  console.log(body);
-	  contentPage(req,res);
-	}
-
-	request(options, callback);
+  function callback(error, response, body) {
+    if( error ){
+        console.log(error);
+    } else {
+      contentsObject = JSON.parse(body);
+      console.log(body);
+      contentPage(req,res);
+    }
+  }
+  request(options, callback);
 }
 
 //display contents of a workspace
@@ -138,9 +142,14 @@ function contentPage(req,res){
   res.write('<a href=\"http://localhost:3000/workspaces\">Workspaces</a>');
   res.write('<br>');
   res.write('<h3>' + req.params.name + '</h3>');
-  
-  res.write('</body></html>');
-  res.end();  
+  if( token == undefined ){
+    res.write('<p>You are not logged in!</p>');  
+    res.write('</body></html>');
+    res.end();
+  } else {
+    res.write('</body></html>');
+    res.end();  
+  }
 }
 
 //at root, return home page
@@ -182,13 +191,13 @@ dispatcher.onGet("/callback", function(req,res) {
       if( err ){
         console.log(err);
       }
-	  else if(response.statusCode > 400 ){
-		errorPage(res,response);
-	  } else {
+    else if(response.statusCode > 400 ){
+    errorPage(res,response);
+    } else {
         token_object = JSON.parse(body);
         token = token_object.access_token;
-	    homePage(req,res);
-	  }
+      homePage(req,res);
+    }
     });
 });
 

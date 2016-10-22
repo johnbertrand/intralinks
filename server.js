@@ -147,15 +147,18 @@ function contentPage(req,res,obj){
     res.write('</body></html>');
     res.end();
   } else {
-	
-	if( obj['folder'] != undefined){
+    if( obj['folder'] != undefined){
       for (var i=0; i<obj['folder'].length; i++){
         var name = obj['folder'][i]['name'];
         var id = obj['folder'][i]['id'];
-        res.write('<p>' + name + ' : ' + id + '</p>');
+        
+		//do not show sub-folders
+		var parentId = obj['folder'][i]['parentId'];
+	    if( parentId == undefined ){
+	      res.write('<p>' + name + ' : ' + id + '</p>');
+	    }
       }
     }
-	
     res.write('</body></html>');
     res.end();  
   }

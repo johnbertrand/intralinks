@@ -358,7 +358,7 @@ dispatcher.onGet("/callback", function(req,res) {
     'client_secret' : secret,
     'endOtherSessions' : 'false'
   });
-  console.log(post_data);
+  
   request({
     headers: {
       'Content-Type' : 'application/x-www-form-urlencoded',

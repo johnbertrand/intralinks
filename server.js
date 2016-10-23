@@ -3,6 +3,8 @@ var dispatcher = require('httpdispatcher');
 var querystring = require('querystring'); //used to build POST request data
 var request = require('request'); //used to perform HTTP requests
 var HashMap = require('hashmap'); //HashMap datastructure
+var FormData = require('form-data'); //form data
+const fs = require('fs'); //fs
 
 //localhost:3000
 const PORT = 3000;
@@ -221,7 +223,7 @@ function folderPage(req,res,obj,workspace){
 	
 	//upload prompt
 	var docName = "theNewDocument";
-	res.write('<br><a href=\"http://localhost:3000/upload?workspace=' + workspace + '&folderId=' + req.params.id + '&docName=' + docName + '\">[Upload File Here]</a>');
+	res.write('<br><a href=\"http://localhost:3000/upload?workspace=' + workspace + '&folderId=' + req.params.id + '&name=' + req.params.name + '&docName=' + docName + '\">[Upload File Here]</a>');
 	
     res.write('</body></html>');
     res.end();  
@@ -248,13 +250,43 @@ dispatcher.onGet("/folder", function(req,res) {
   getFolder(req,res);
 });
 
+//upload file as attachment to document in workspace
+function uploadFile(req,res,id,version){
+  var binaryData = "";
+  
+  var binaryData = new FormData();
+
+  binaryData.append("filename", fs.createReadStream("test.txt"));
+  console.log(fs.createReadStream("test.txt"));
+  
+  var post_data = 'documentFile=' + binaryData;
+  
+  var options = {
+	url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents/' + id + '/file?version=' + version,
+	headers: {
+	'Authorization' : 'Bearer ' + token,
+	'Content-Type' : 'multipart/form-data; boundary=__X_BOUNDARY_123456__',
+	},
+	method: 'PUT',
+	body: post_data
+  };
+
+  function callback(error, response, body) {
+	//upload finished! return to page
+	console.log(body);
+	res.writeHead(302, {'Location': 'http://localhost:3000/folder?id=' + req.params.folderId + '&workspace=' + req.params.workspace + '&name=' + req.params.name });
+    res.end();
+  }
+
+  request(options, callback);
+}
+
 //creates placeholder document
 function createPlaceHolderDocument(req, res){
 
   var post_json = { documents:[{document: {name: req.params.docName, parentId : parseInt(req.params.folderId)}}]};
   
   var post_data = JSON.stringify(post_json);
-  console.log(post_data);
   
   var options = {
 	url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents',
@@ -274,6 +306,8 @@ function createPlaceHolderDocument(req, res){
 	  
 	  id = placeholder['documentPartial'][0]['id'];
 	  version = placeholder['documentPartial'][0]['version'];
+	  
+	  uploadFile(req,res,id,version);
 	  
 	} else {
 		console.log('Could not create placeholder document');

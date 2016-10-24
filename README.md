@@ -20,6 +20,14 @@
  - https://github.com/form-data/form-data
  - attempt at trying to build binary data for file upload API call
 
+# Homepage
+
+![Homepage](/homepage.png)
+
+# Folder View
+
+![Folder View](/folderview.png)
+
 # Implemented Features
 
 - A login page that will trigger the Oauth flow of IL

@@ -22,11 +22,11 @@
 
 # Homepage
 
-![Homepage](/homepage.png)
+![Homepage](/homepage.PNG)
 
 # Folder View
 
-![Folder View](/folderview.png)
+![Folder View](/folderview.PNG)
 
 # Implemented Features
 

@@ -135,7 +135,7 @@ function getContents(req,res){
 
 //request content of specific folder
 function getFolder(req,res){
-	var options = {
+  var options = {
     url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/folders/' + req.params.id + '/contents',
     headers: {
     'Authorization' : 'Bearer ' + token,
@@ -174,12 +174,12 @@ function contentPage(req,res,obj,workspace){
         var name = obj['folder'][i]['name'];
         var id = obj['folder'][i]['id'];
         
-		//do not show sub-folders
-		var parentId = obj['folder'][i]['parentId'];
-	    if( parentId == undefined ){
-		  res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
+    //do not show sub-folders
+    var parentId = obj['folder'][i]['parentId'];
+      if( parentId == undefined ){
+      res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
                       + workspace + '&name=' + name + '\">/' + name + '</a><br>');
-	    }
+      }
       }
     }
     res.write('</body></html>');
@@ -198,33 +198,33 @@ function folderPage(req,res,obj,workspace){
   res.write('<br>');
   if( req.params.name != undefined ){
     res.write('<br><br><a href=\"\">[BACK]</a>'); //TODO
-	res.write('<h3>/' + req.params.name + '</h3>');
-	res.write('<br><br>');
+    res.write('<h3>/' + req.params.name + '</h3>');
+    res.write('<br><br>');
   }
   if( token == undefined ){
     res.write('<p>You are not logged in!</p>');  
     res.write('</body></html>');
     res.end();
   } else {
-	if( obj['contentList'] != undefined && obj['contentList']['docFolderList'] != undefined){
+  if( obj['contentList'] != undefined && obj['contentList']['docFolderList'] != undefined){
       for (var i=0; i<obj['contentList']['docFolderList'].length; i++){
         var name = obj['contentList']['docFolderList'][i]['name'];
         var id = obj['contentList']['docFolderList'][i]['id'];
         
-		if( obj['contentList']['docFolderList'][i]['entityType'] == "DOCUMENT" ){ //document
-		  res.write('<p>' + name + '</p>');
-		} else { //folder
-		  res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
+        if( obj['contentList']['docFolderList'][i]['entityType'] == "DOCUMENT" ){ //document
+          res.write('<p>' + name + '</p>');
+        } else { //folder
+        res.write('<a href=\"http://localhost:3000/folder?id=' + id + '&workspace=' 
                       + workspace + '&name=' + name + '\">/' + name + '</a><br>');
-		}
-		res.write('<br>');
+        }
+        res.write('<br>');
       }
     }
-	
-	//upload prompt
-	var docName = "theNewDocument";
-	res.write('<br><a href=\"http://localhost:3000/upload?workspace=' + workspace + '&folderId=' + req.params.id + '&name=' + req.params.name + '&docName=' + docName + '\">[Upload File Here]</a>');
-	
+  
+  //upload prompt
+  var docName = "theNewDocument";
+  res.write('<br><a href=\"http://localhost:3000/upload?workspace=' + workspace + '&folderId=' + req.params.id + '&name=' + req.params.name + '&docName=' + docName + '\">[Upload File Here]</a>');
+  
     res.write('</body></html>');
     res.end();  
   }
@@ -262,19 +262,19 @@ function uploadFile(req,res,id,version){
   var post_data = 'documentFile=' + binaryData;
   
   var options = {
-	url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents/' + id + '/file?version=' + version,
-	headers: {
-	'Authorization' : 'Bearer ' + token,
-	'Content-Type' : 'multipart/form-data; boundary=__X_BOUNDARY_123456__',
-	},
-	method: 'PUT',
-	body: post_data
+  url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents/' + id + '/file?version=' + version,
+  headers: {
+  'Authorization' : 'Bearer ' + token,
+  'Content-Type' : 'multipart/form-data; boundary=__X_BOUNDARY_123456__',
+  },
+  method: 'PUT',
+  body: post_data
   };
 
   function callback(error, response, body) {
-	//upload finished! return to page
-	console.log(body);
-	res.writeHead(302, {'Location': 'http://localhost:3000/folder?id=' + req.params.folderId + '&workspace=' + req.params.workspace + '&name=' + req.params.name });
+  //upload finished! return to page
+  console.log(body);
+  res.writeHead(302, {'Location': 'http://localhost:3000/folder?id=' + req.params.folderId + '&workspace=' + req.params.workspace + '&name=' + req.params.name });
     res.end();
   }
 
@@ -289,34 +289,34 @@ function createPlaceHolderDocument(req, res){
   var post_data = JSON.stringify(post_json);
   
   var options = {
-	url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents',
-	headers: {
-	'Authorization' : 'Bearer ' + token,
-	'Accept' : 'application/json',
-	'Content-Type' : 'application/json',
-	},
-	method: 'POST',
-	body: post_data
+  url: 'https://test-api.intralinks.com/v2/workspaces/' + req.params.workspace + '/documents',
+  headers: {
+  'Authorization' : 'Bearer ' + token,
+  'Accept' : 'application/json',
+  'Content-Type' : 'application/json',
+  },
+  method: 'POST',
+  body: post_data
   };
 
   function callback(error, response, body) {
-	if( response.statusCode == 201 ){
-	  //placeholder has been created, now need to upload
-	  placeholder = JSON.parse(body);
-	  
-	  id = placeholder['documentPartial'][0]['id'];
-	  version = placeholder['documentPartial'][0]['version'];
-	  
-	  uploadFile(req,res,id,version);
-	  
-	} else {
-		console.log('Could not create placeholder document');
-	}
+  if( response.statusCode == 201 ){
+    //placeholder has been created, now need to upload
+    placeholder = JSON.parse(body);
+    
+    id = placeholder['documentPartial'][0]['id'];
+    version = placeholder['documentPartial'][0]['version'];
+    
+    uploadFile(req,res,id,version);
+    
+  } else {
+    console.log('Could not create placeholder document');
+  }
   }
 
   
   request(options, callback);
-	
+  
 }
 
 //called when user wants to upload a file to a workspace
@@ -331,17 +331,17 @@ dispatcher.onGet("/upload", function(req,res) {
     headers: {
     'Authorization' : 'Bearer ' + token,
     'Accept' : 'application/json',
-	'Content-Type' : 'application/json',
+  'Content-Type' : 'application/json',
     },
-	body: post_data
+  body: post_data
   };
 
   function callback(error, response, body) {
     if( response.statusCode == 200 ){
-		createPlaceHolderDocument(req,res);
-	} else {
-		console.log('Could not enter workspace: ' + req.params.workspace);
-	}
+    createPlaceHolderDocument(req,res);
+  } else {
+    console.log('Could not enter workspace: ' + req.params.workspace);
+  }
   }
 
   request(options, callback);
